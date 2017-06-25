@@ -6,6 +6,12 @@
   "author": "Karl Doyle",
   "license": "MIT",
   "dependencies": {
-    "knockout": "^3.4.2"
+    "bootstrap": "3",
+    "http-server": "^0.10.0",
+    "knockout": "^3.4.2",
+    "live-server": "^1.2.0"
+  },
+  "scripts": {
+    "start": "node ./server.js"
   }
 }
