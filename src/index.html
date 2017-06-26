@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="page-header">
+      <h1>Neighbourhood Map</h1>
+    </header>
+    <!-- end of .page-header -->
+
+    <section class="row">
+      <div class="col-sm-12 col-md-4 col-lg-3">
+        <form>
+          <div class="form-group">
+            <label for="searchFieldInput" class="sr-only">Search</label>
+            <input type="search" class="form-control" id="searchFieldInput" placeholder="Search">
+          </div>
+        </form>
+        <div class="list-group">
+          <a href="#" class="list-group-item active">Location Name</a>
+          <a href="#" class="list-group-item">Location Name</a>
+          <a href="#" class="list-group-item">Location Name</a>
+          <a href="#" class="list-group-item">Location Name</a>
+          <a href="#" class="list-group-item">Location Name</a>
+        </div>
+        <div class="alert alert-info" role="alert">No locations found</div>
+      </div>
+
+      <div class="col-sm-12 col-md-8 col-lg-9">
+        <article id="google-map" class="thumbnail">
+          <img src="http://via.placeholder.com/1600x1200" alt="" class="img-responsive">
+        </article>
+        <!-- end of #google-map -->
+      </div>
+      <!-- end of .col-sm-12.col-md-8.col-lg-9 -->
+    </section>
+
+  </div>
+  <!-- end of .container -->
+</body>
+</html>
