@@ -17,22 +17,23 @@
       <div class="col-sm-12 col-md-4 col-lg-3">
         <form>
           <div class="form-group">
-            <label for="searchFieldInput" class="sr-only">Search</label>
-            <input type="search" class="form-control" id="searchFieldInput" placeholder="Search">
+            <input data-bind="value: searchQuery,valueUpdate: 'keyup'" class="form-control" placeholder="Search">
           </div>
         </form>
-        <div class="list-group">
-          <a href="#" class="list-group-item active">Location Name</a>
-          <a href="#" class="list-group-item">Location Name</a>
-          <a href="#" class="list-group-item">Location Name</a>
-          <a href="#" class="list-group-item">Location Name</a>
-          <a href="#" class="list-group-item">Location Name</a>
+        <div id="results" class="list-group" data-bind="foreach: filterLocations">
+          <a href="#"
+            class="list-group-item active"
+            data-bind="text: $data[0],
+                       css: { 'active' : $data === $parent.selectedLocation() },
+                       click: function($data, event) { $parent.clickLocation($data) }"></a>
         </div>
-        <div class="alert alert-info" role="alert">No locations found</div>
+        <div data-bind="ifnot: filterLocations().length">
+          <div class="alert alert-info" role="alert" data-bind="text: notFoundText"></div>
+        </div>
       </div>
 
       <div class="col-sm-12 col-md-8 col-lg-9">
-        <article id="google-map" class="thumbnail">
+        <article id="map" style="height:500px" class="thumbnail">
           <img src="http://via.placeholder.com/1600x1200" alt="" class="img-responsive">
         </article>
         <!-- end of #google-map -->
@@ -42,5 +43,8 @@
 
   </div>
   <!-- end of .container -->
+  <script src="components/knockout/build/output/knockout-latest.js"></script>
+  <script src="application.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCyfezGNrhqwNRmx1jX114-9R9xjLGqy-o&callback=initMap"></script>
 </body>
 </html>

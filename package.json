@@ -2,7 +2,7 @@
   "name": "neighborhood-map",
   "version": "1.0.0",
   "description": "A Udacity Project",
-  "main": "index.js",
+  "main": "./server.js",
   "author": "Karl Doyle",
   "license": "MIT",
   "dependencies": {
