@@ -1,83 +1,171 @@
-let Application = {
-  // settings
-  settings: {
-    search: document.getElementById('search'),
-    map: document.getElementById('map'),
-    results: document.getElementById('results'),
-    filtered: [],
-    locations: [
-      ['Bondi Beach', -33.890542, 151.274856, 4],
-      ['Coogee Beach', -33.923036, 151.259052, 5],
-      ['Cronulla Beach', -34.028249, 151.157507, 3],
-      ['Manly Beach', -33.80010128657071, 151.28747820854187, 2],
-      ['Maroubra Beach', -33.950198, 151.259302, 1]
-    ],
-    mapDefault: {
-      center: {lat: -34.397, lng: 150.644},
-      zoom: 8
-    },
-  },
-  init: function() {
-    return this.initMap();
-  },
-  viewModel: function(locations) {
-    this.searchQuery = ko.observable();
-    this.selectedLocation = ko.observable();
-    this.notFoundText = ko.computed(() => {
-      return 'No locations found for ' + this.searchQuery();
-    })
-    this.clickLocation = function(data) {
-      this.selectedLocation(this.selectedLocation() != data ? data : null );
-    };
-    this.locations = ko.observableArray(locations);
-    this.filterLocations = ko.computed(() => {
-      this.selectedLocation(null);
-      let search = this.searchQuery() ? this.searchQuery().toLowerCase() : '';
-      if (search.length < 0) {
-        filtered = this.locations;
-      } else {
-        filtered = ko.utils.arrayFilter(this.locations(), (res) => res[0].toLowerCase().indexOf(search) >= 0);
-      }
-      return filtered;
-    })
-  },
-  initMap: function() {
-    map = new google.maps.Map(this.settings.map, this.settings.mapDefault);
-    var infowindow = new google.maps.InfoWindow();
-    var bounds = new google.maps.LatLngBounds();
-    this.generateMapMarkers(map, window.filtered, bounds, infowindow)
-    map.fitBounds(bounds)
-  },
-  addMarker: function(x, y, map) {
-    return new google.maps.Marker({
-      position: new google.maps.LatLng(x, y),
-      map: map
-    });
-  },
-  setMapOnAll: function(markers, map, selected) {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
-    }
-  },
-  showMarkers: function(map) {
-    this.setMapOnAll(map);
-  },
-  generateMapMarkers: function(map, locations, bounds, infowindow) {
-    var marker, i;
-    for (i = 0; i < locations.length; i++) {
-      marker = this.addMarker(locations[i][1], locations[i][2], map);
-      bounds.extend(marker.getPosition());
-      google.maps.event.addListener(marker, 'click', (function(marker, i) {
-        return function() {
-          infowindow.setContent(locations[i][0]);
-          infowindow.open(map, marker);
-        }
-      })(marker, i));
-    }
-  }
-};
+'use strict';
 
-function initMap() {
-  ko.applyBindings(new Application.viewModel(Application.settings.locations));
-  return Application.init();
+var initialLocations = [
+  {
+    name: 'Guinness Storehouse',
+    lat: 53.3413402,
+    long: -6.2890717
+  },
+,
+  {
+    name: 'Dublin Zoo',
+    lat: 53.3561967,
+    long: -6.3074785
+  },
+  {
+    name: 'National Aquatic Centre',
+    lat: 53.3969824,
+    long: -6.3723277
+  },
+  {
+    name: 'Book of Kells',
+    lat: 53.3439361,
+    long:-6.2589288
+  }, {
+    name: 'The National Gallery of Ireland',
+    lat: 53.3409091,
+    long:-6.2546912
+  }
+];
+
+let map;
+let clientID = "G4ZLYOJDLCW1PYMVQFK11QIL5YCHBLCU5BCSE3JGQ2TVYFZC";
+let clientSecret = "X4L3313SSOWOHMWFWZZKDVDULOQW1ZMYHK1QREIFPXJOI4IM";
+
+// location
+class Location {
+  constructor(location) {
+
+    let self = this;
+    this.name = location.name;
+    this.lat = location.lat;
+    this.long = location.long;
+    this.visible = ko.observable(true);
+    this.infoWindow = new google.maps.InfoWindow({content: `
+        <div class="info-window-content">
+          <div class="title">
+            <b>${location.name}</b>
+          </div>
+          <div class="content"><a target="_blank" href="${self.URL}">${self.URL}</a></div>
+          <div class="content">${self.street}</div>
+          <div class="content">${self.city}</div>
+          <div class="content">${self.phone}</div>
+        </div>
+      `});
+
+    let foursquareURL = `https://api.foursquare.com/v2/venues/search?ll=${this.lat},${this.long}&client_id=${clientID}&client_secret=${clientSecret}&v=20160118&query=${this.name}`;
+
+    fetch(foursquareURL).then((response) => {
+      return response.json()
+    }).then((data) => {
+      let results = data.response.venues[0];
+      self.URL = results.url;
+      if (typeof self.URL === 'undefined'){
+        self.URL = "";
+      }
+      self.street = results.location.formattedAddress[0];
+      self.city = results.location.formattedAddress[1];
+          self.phone = results.contact.phone;
+          if (typeof self.phone === 'undefined'){
+        self.phone = "";
+      } else {
+        self.phone = formatPhone(self.phone);
+      }
+    }).catch((error) => {
+      console.log("There was an error with the Foursquare. Please refresh the page and try again.");
+    })
+
+    this.marker = new google.maps.Marker({
+      position: new google.maps.LatLng(location.lat, location.long),
+      map: map
+      // title: name
+    });
+
+    this.showMarker = ko.computed(function() {
+      if(this.visible() === true) {
+        this.marker.setMap(map);
+      } else {
+        this.marker.setMap(null);
+      }
+      return true;
+    }, this);
+
+
+    this.marker.addListener('click', function(){
+
+      self.contentString = `
+        <div class="info-window-content">
+          <div class="title">
+            <b>${location.name}</b>
+          </div>
+          <div class="content"><a  target="_blank" href="${self.URL}">${self.URL}</a></div>
+          <div class="content">${self.street}</div>
+          <div class="content">${self.city}</div>
+          <div class="content">${self.phone}</div>
+        </div>
+      `;
+
+      let infoMap = self.infoWindow.getMap();
+      if (infoMap != null && infoMap != 'undefined') {
+        self.infoWindow.close();
+      } else {
+        self.infoWindow.open(map, this);
+      }
+      self.infoWindow.setContent(self.contentString);
+
+      self.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+      setTimeout(function() {
+        self.marker.setAnimation(null);
+      }, 1000);
+
+    });
+  }
+
+  bounce(place) {
+    google.maps.event.trigger(this.marker, 'click');
+  };
+}
+
+
+class AppViewModel {
+  constructor() {
+    let self = this;
+    this.searchTerm = ko.observable("");
+    this.locationList = ko.observableArray([]);
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 12,
+      center: {lat: 53.3629772, lng: -6.30565}
+    });
+    initialLocations.forEach((locationItem) => {
+      self.locationList.push(new Location(locationItem))
+    });
+    this.filteredList = ko.computed( function() {
+      var filter = self.searchTerm().toLowerCase();
+      if (!filter) {
+        self.locationList().forEach(function(locationItem){
+          locationItem.visible(true);
+        });
+        return self.locationList();
+      } else {
+        return ko.utils.arrayFilter(self.locationList(), function(locationItem) {
+          var string = locationItem.name.toLowerCase();
+          var result = (string.search(filter) >= 0);
+          locationItem.visible(result);
+          return result;
+        });
+      }
+    }, self);
+
+    this.mapElem = document.getElementById('map');
+    this.mapElem.style.height = window.innerHeight - 50;
+  }
+}
+
+function startApp() {
+  ko.applyBindings(new AppViewModel());
+}
+
+function errorHandling() {
+  alert("Google Maps has failed to load. Please check your internet connection and try again.");
 }
