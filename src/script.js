@@ -35,12 +35,17 @@ class Location {
     let self = this;
     this.marker.addListener('click', function() {
       self.infoWindow.open(map, this);
+      // https://stackoverflow.com/questions/7339200/bounce-a-pin-in-google-maps-once
+      self.marker.setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(function() {self.marker.setAnimation(null)}, 750);
     })
 
     this.showMarker = ko.computed(function() {
       this.marker.setMap(this.visible() === true ? mapInstance : null)
       return true;
     }, this);
+
+    self.marker.setAnimation(google.maps.Animation.DROP);
 
     bounds.extend(this.marker.position);
 
