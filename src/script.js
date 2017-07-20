@@ -153,8 +153,8 @@ function getInfoWindow(name, url, street, city) {
         <b>${name}</b>
       </div>
       ${url ? `<div class="content"><a href="${url}" target="_blank">${url}</a></div>` : ""}
-      <div class="content">${street}</div>
-      <div class="content">${city}</div>
+      ${street ? `<div class="content">${street}</div>` : ""}
+      ${city ? `<div class="content">${city}</div>` : ""}
     </div>
   `;
 }
