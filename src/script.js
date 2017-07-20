@@ -46,9 +46,7 @@ class Location {
     }, this);
 
     self.marker.setAnimation(google.maps.Animation.DROP);
-
     bounds.extend(this.marker.position);
-
   }
   toggle() {
     google.maps.event.trigger(this.marker, 'click');
@@ -58,7 +56,6 @@ class Location {
 class Application {
   constructor() {
     let self = this;
-
     // default values
     this.searchQuery = ko.observable("");
     this.defaultLocations = ko.observableArray([]);
@@ -95,7 +92,6 @@ function init() {
  * @return {string}        valid url
  */
 function createFoursquareUrl(lat,lng,id,secret) {
-  console.log(new Date)
   let dt = new Date();
   let today = `${dt.getUTCFullYear()}${dt.getMonth() < 10 ? "0" + (dt.getMonth() + 1) : dt.getMonth() + 1}${dt.getDate() < 10 ? "0" + dt.getDate() : dt.getDate()}`
 
@@ -138,6 +134,7 @@ function getFilteredLocations() {
     });
   }
 }
+
 /**
  * Get HTML for infoWindow of Location
  * @param  {string} name
